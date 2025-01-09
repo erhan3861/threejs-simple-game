@@ -15,7 +15,7 @@
   </style>
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
   <script>
     // Three.js sahnesi
     const scene = new THREE.Scene();
@@ -45,8 +45,7 @@
     plane.rotation.x = -Math.PI / 2;
     scene.add(plane);
 
-
-    let targetPosition = new THREE.Vector3(); // İlk olarak tanımla
+    let targetPosition = new THREE.Vector3();
 
 
     // Küp
@@ -60,24 +59,22 @@
     const fragments = [];
 
     // Küp rastgele hareket
+    function resetCubePosition() {
+      cube.position.set(
+        Math.random() * 10 - 5,
+        0.5,
+        Math.random() * 10 - 5
+      );
+      setRandomTarget();
+    }
 
-function resetCubePosition() {
-  cube.position.set(
-    Math.random() * 10 - 5,
-    0.5,
-    Math.random() * 10 - 5
-  );
-  setRandomTarget(); // Daha sonra kullan
-}
-
-function setRandomTarget() {
-  targetPosition.set(
-    Math.random() * 10 - 5,
-    0.5,
-    Math.random() * 10 - 5
-  );
-}
-
+    function setRandomTarget() {
+      targetPosition.set(
+        Math.random() * 10 - 5,
+        0.5,
+        Math.random() * 10 - 5
+      );
+    }
 
     // Tıklama olayını dinle
     window.addEventListener('click', (event) => {
@@ -96,25 +93,31 @@ function setRandomTarget() {
     });
 
     function destroyCube() {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 20; i++) {
         const fragment = new THREE.Mesh(
           new THREE.BoxGeometry(0.3, 0.3, 0.3),
           new THREE.MeshStandardMaterial({ color: 0xff0000 })
         );
         fragment.position.copy(cube.position);
-        fragment.position.x += Math.random() - 0.5;
-        fragment.position.y += Math.random() * 0.5;
-        fragment.position.z += Math.random() - 0.5;
+        fragment.position.x += (Math.random() - 0.5) * 2;
+        fragment.position.y += Math.random() * 2;
+        fragment.position.z += (Math.random() - 0.5) * 2;
 
-        fragments.push(fragment);
+        const velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * 0.5,
+          Math.random() * 0.5,
+          (Math.random() - 0.5) * 0.5
+        );
+
+        fragments.push({ mesh: fragment, velocity });
         scene.add(fragment);
 
         // Parçayı 5 saniye sonra sahneden kaldır
         setTimeout(() => {
           scene.remove(fragment);
-          const index = fragments.indexOf(fragment);
+          const index = fragments.findIndex(f => f.mesh === fragment);
           if (index > -1) fragments.splice(index, 1);
-        }, 5000);
+        }, 3000);
       }
 
       // Küpü sahneden kaldır ve 5 saniye sonra yeniden oluştur
@@ -123,12 +126,18 @@ function setRandomTarget() {
         cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
         resetCubePosition();
         scene.add(cube);
-      }, 5000);
+      }, 1000);
     }
 
     // Animasyon döngüsü
     function animate() {
       requestAnimationFrame(animate);
+
+      // Parçacıkları hareket ettir
+      fragments.forEach(fragment => {
+        fragment.mesh.position.add(fragment.velocity);
+        fragment.velocity.y -= 0.01; // Yerçekimi etkisi
+      });
 
       // Küp hedefe doğru hareket ettir
       const direction = new THREE.Vector3();
