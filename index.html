@@ -15,8 +15,8 @@
   </style>
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
-  <script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
+    <script>
     // Three.js sahnesi
     const scene = new THREE.Scene();
 
@@ -47,7 +47,6 @@
 
     let targetPosition = new THREE.Vector3();
 
-
     // Küp
     const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
     const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
@@ -59,6 +58,7 @@
     const fragments = [];
 
     // Küp rastgele hareket
+    
     function resetCubePosition() {
       cube.position.set(
         Math.random() * 10 - 5,
@@ -109,7 +109,13 @@
           (Math.random() - 0.5) * 0.5
         );
 
-        fragments.push({ mesh: fragment, velocity });
+        const rotationSpeed = new THREE.Vector3(
+          Math.random() * 0.1,
+          Math.random() * 0.1,
+          Math.random() * 0.1
+        );
+
+        fragments.push({ mesh: fragment, velocity, rotationSpeed });
         scene.add(fragment);
 
         // Parçayı 5 saniye sonra sahneden kaldır
@@ -117,7 +123,7 @@
           scene.remove(fragment);
           const index = fragments.findIndex(f => f.mesh === fragment);
           if (index > -1) fragments.splice(index, 1);
-        }, 3000);
+        }, 5000);
       }
 
       // Küpü sahneden kaldır ve 5 saniye sonra yeniden oluştur
@@ -136,6 +142,9 @@
       // Parçacıkları hareket ettir
       fragments.forEach(fragment => {
         fragment.mesh.position.add(fragment.velocity);
+        fragment.mesh.rotation.x += fragment.rotationSpeed.x;
+        fragment.mesh.rotation.y += fragment.rotationSpeed.y;
+        fragment.mesh.rotation.z += fragment.rotationSpeed.z;
         fragment.velocity.y -= 0.01; // Yerçekimi etkisi
       });
 
